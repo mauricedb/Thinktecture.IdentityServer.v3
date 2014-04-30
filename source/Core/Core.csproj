@@ -207,6 +207,7 @@
     <Compile Include="Connect\Validation\ValidationResult.cs" />
     <Compile Include="Authentication\SignInMessage.cs" />
     <Compile Include="Extensions\StringsExtensions.cs" />
+    <Compile Include="TinyIoC.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
