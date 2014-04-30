@@ -3,9 +3,10 @@
  * see license
  */
 
-using Autofac;
 using System;
 using System.Net.Http;
+
+using TinyIoC;
 
 namespace Thinktecture.IdentityServer.Core.Extensions
 {
@@ -24,10 +25,10 @@ namespace Thinktecture.IdentityServer.Core.Extensions
             return baseUrl;
         }
 
-        public static ILifetimeScope GetAutofacScope(this HttpRequestMessage request)
+        public static TinyIoCContainer GetAutofacScope(this HttpRequestMessage request)
         {
             var owinContext = request.GetOwinContext();
-            var scope = owinContext.Get<ILifetimeScope>("idsrv:AutofacScope");
+            var scope = owinContext.Get<TinyIoCContainer>("idsrv:TinyIoCContainer");
 
             return scope;
         }

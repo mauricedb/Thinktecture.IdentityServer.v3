@@ -2,20 +2,21 @@
  * Copyright (c) Dominick Baier, Brock Allen.  All rights reserved.
  * see license
  */
-using Autofac;
 using Microsoft.Owin;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
+using TinyIoC;
 
 namespace Thinktecture.IdentityServer.Core.Configuration
 {
     public class AutofacContainerMiddleware
     {
         readonly private Func<IDictionary<string, object>, Task> _next;
-        readonly private IContainer _container;
+        readonly private TinyIoCContainer _container;
 
-        public AutofacContainerMiddleware(Func<IDictionary<string, object>, Task> next, IContainer container)
+        public AutofacContainerMiddleware(Func<IDictionary<string, object>, Task> next, TinyIoCContainer container)
         {
             _next = next;
             _container = container;
@@ -26,14 +27,11 @@ namespace Thinktecture.IdentityServer.Core.Configuration
             var context = new OwinContext(env);
 
             // this creates a per-request, disposable scope
-            using (var scope = _container.BeginLifetimeScope(b =>
+            using (var childContainer = _container.GetChildContainer())
             {
-                // this makes owin context resolvable in the scope
-                b.RegisterInstance(context).As<IOwinContext>();
-            }))
-            {
+                childContainer.Register<IOwinContext>(context);
                 // this makes scope available for downstream frameworks
-                context.Set<ILifetimeScope>("idsrv:AutofacScope", scope);
+                context.Set("idsrv:TinyIoCContainer", childContainer);
                 await _next(env);
             }
         }

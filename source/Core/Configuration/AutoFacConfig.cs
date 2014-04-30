@@ -3,18 +3,18 @@
  * see license
  */
 
-using Autofac;
-using Autofac.Integration.WebApi;
 using System;
 using Thinktecture.IdentityServer.Core.Connect;
 using Thinktecture.IdentityServer.Core.Connect.Services;
 using Thinktecture.IdentityServer.Core.Services;
 
+using TinyIoC;
+
 namespace Thinktecture.IdentityServer.Core.Configuration
 {
     public static class AutofacConfig
     {
-        public static IContainer Configure(IdentityServerCoreOptions options)
+        public static TinyIoCContainer Configure(IdentityServerCoreOptions options)
         {
             if (options == null) throw new ArgumentNullException("options");
             if (options.Factory == null) throw new InvalidOperationException("null factory");
@@ -22,82 +22,80 @@ namespace Thinktecture.IdentityServer.Core.Configuration
             IdentityServerServiceFactory fact = options.Factory;
             fact.Validate();
 
-            var builder = new ContainerBuilder();
+
+            var container = TinyIoCContainer.Current;
 
             // mandatory from factory
-            builder.Register(ctx => fact.AuthorizationCodeStore()).As<IAuthorizationCodeStore>();
-            builder.Register(ctx => fact.CoreSettings()).As<ICoreSettings>();
-            builder.Register(ctx => fact.Logger()).As<ILogger>();
-            builder.Register(ctx => fact.TokenHandleStore()).As<ITokenHandleStore>();
-            builder.Register(ctx => fact.UserService()).As<IUserService>();
-            builder.Register(ctx => fact.ConsentService()).As<IConsentService>();
+            container.Register((_, __) => fact.AuthorizationCodeStore());
+            container.Register((_, __) => fact.CoreSettings());
+            container.Register((_, __) => fact.Logger());
+            container.Register((_, __) => fact.TokenHandleStore());
+            container.Register((_, __) => fact.UserService());
+            container.Register((_, __) => fact.ConsentService());
 
             // optional from factory
             if (fact.ClaimsProvider != null)
             {
-                builder.Register(ctx => fact.ClaimsProvider()).As<IClaimsProvider>();
+                container.Register((_, __) => fact.ClaimsProvider());
             }
             else
             {
-                builder.RegisterType<DefaultClaimsProvider>().As<IClaimsProvider>();
+                container.Register<IClaimsProvider, DefaultClaimsProvider>();
             }
 
             if (fact.TokenService != null)
             {
-                builder.Register(ctx => fact.TokenService()).As<ITokenService>();
+                container.Register((_, __) => fact.TokenService());
             }
             else
             {
-                builder.RegisterType<DefaultTokenService>().As<ITokenService>();
+                container.Register<ITokenService, DefaultTokenService>();
             }
 
             if (fact.CustomRequestValidator != null)
             {
-                builder.Register(ctx => fact.CustomRequestValidator()).As<ICustomRequestValidator>();
+                container.Register((_, __) => fact.CustomRequestValidator());
             }
             else
             {
-                builder.RegisterType<DefaultCustomRequestValidator>().As<ICustomRequestValidator>();
+                container.Register<ICustomRequestValidator, DefaultCustomRequestValidator>();
             }
 
             if (fact.AssertionGrantValidator != null)
             {
-                builder.Register(ctx => fact.AssertionGrantValidator()).As<IAssertionGrantValidator>();
+                container.Register((_, __) => fact.AssertionGrantValidator());
             }
             else
             {
-                builder.RegisterType<DefaultAssertionGrantValidator>().As<IAssertionGrantValidator>();
+                container.Register<IAssertionGrantValidator, DefaultAssertionGrantValidator>();
             }
 
             if (fact.ExternalClaimsFilter != null)
             {
-                builder.Register(ctx => fact.ExternalClaimsFilter()).As<IExternalClaimsFilter>();
+                container.Register((_, __) => fact.ExternalClaimsFilter());
             }
             else
             {
-                builder.RegisterType<DefaultExternalClaimsFilter>().As<IExternalClaimsFilter>();
+                container.Register<IExternalClaimsFilter, DefaultExternalClaimsFilter>();
             }
 
             // validators
-            builder.RegisterType<TokenRequestValidator>();
-            builder.RegisterType<AuthorizeRequestValidator>();
-            builder.RegisterType<ClientValidator>();
-            builder.RegisterType<TokenValidator>();
+            container.Register<TokenRequestValidator>();
+            container.Register<AuthorizeRequestValidator>();
+            container.Register<ClientValidator>();
+            container.Register<TokenValidator>();
 
             // processors
-            builder.RegisterType<TokenResponseGenerator>();
-            builder.RegisterType<AuthorizeResponseGenerator>();
-            builder.RegisterType<AuthorizeInteractionResponseGenerator>();
-            builder.RegisterType<UserInfoResponseGenerator>();
+            container.Register<TokenResponseGenerator>();
+            container.Register<AuthorizeResponseGenerator>();
+            container.Register<AuthorizeInteractionResponseGenerator>();
+            container.Register<UserInfoResponseGenerator>();
 
             // for authentication
             var authenticationOptions = options.AuthenticationOptions ?? new AuthenticationOptions();
-            builder.RegisterInstance(authenticationOptions).AsSelf();
+            container.Register(authenticationOptions);
 
-            // controller
-            builder.RegisterApiControllers(typeof(AuthorizeEndpointController).Assembly);
-
-            return builder.Build();
+            return container;
         }
     }
 }

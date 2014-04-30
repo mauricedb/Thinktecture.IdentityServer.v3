@@ -26,6 +26,8 @@ namespace Thinktecture.IdentityServer.Core.Configuration
             //var appXmlType = config.Formatters.XmlFormatter.SupportedMediaTypes.FirstOrDefault(t => t.MediaType == "application/xml");
             //config.Formatters.XmlFormatter.SupportedMediaTypes.Remove(appXmlType);
 
+            config.DependencyResolver = new TinyIoCDependencyResolver(TinyIoC.TinyIoCContainer.Current);
+
             return config;
         }
     }

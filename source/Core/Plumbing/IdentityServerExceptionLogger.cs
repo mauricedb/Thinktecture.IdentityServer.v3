@@ -3,7 +3,6 @@
  * see license
  */
 
-using Autofac;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.ExceptionHandling;

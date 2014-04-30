@@ -3,11 +3,12 @@
  * see license
  */
 
-using Autofac;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Hosting;
+
+using TinyIoC;
 
 namespace Thinktecture.IdentityServer.Core.Configuration
 {
@@ -16,10 +17,10 @@ namespace Thinktecture.IdentityServer.Core.Configuration
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             var owin = request.GetOwinContext();
-            var scope = owin.Get<ILifetimeScope>("idsrv:AutofacScope");
+            var scope = owin.Get<TinyIoCContainer>("idsrv:TinyIoCContainer");
             if (scope != null)
             {
-                request.Properties[HttpPropertyKeys.DependencyScope] = new AutofacScope(scope);
+                request.Properties[HttpPropertyKeys.DependencyScope] = scope.GetChildContainer();
             }
 
             return base.SendAsync(request, cancellationToken);

@@ -3,7 +3,6 @@
  * see license
  */
 
-using Autofac;
 using Microsoft.Owin;
 using Microsoft.Owin.Extensions;
 using Microsoft.Owin.FileSystems;

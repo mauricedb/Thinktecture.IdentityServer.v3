@@ -3,29 +3,32 @@
  * see license
  */
 
-using Autofac;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http.Dependencies;
 
+using TinyIoC;
+
 public class AutofacScope : IDependencyScope
 {
-    ILifetimeScope scope;
-    
-    public AutofacScope(ILifetimeScope scope)
+    TinyIoCContainer scope;
+
+    public AutofacScope(TinyIoCContainer scope)
     {
         this.scope = scope;
     }
     
     public object GetService(System.Type serviceType)
     {
-        return scope.ResolveOptional(serviceType);
+        object resolvedType;
+        scope.TryResolve(serviceType, out resolvedType);
+        return resolvedType;
     }
 
     public System.Collections.Generic.IEnumerable<object> GetServices(System.Type serviceType)
     {
-        if (!scope.IsRegistered(serviceType))
+        if (!scope.CanResolve(serviceType))
         {
             return Enumerable.Empty<object>();
         }
